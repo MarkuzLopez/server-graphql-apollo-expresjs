@@ -6,17 +6,24 @@
         emails: [Email]
         edad: Int
         tipo: TipoCliente
-        pedidos: [Pedido]
     }
-
-    type Pedido { 
-        producto: String
-        precio: Int
-    }
-
 
     type Email { 
         email: String
+    }
+
+    type Pedido {
+        id: ID
+        pedido: [PedidoProducto]
+        total: Int
+        fecha: String
+        cliente: ID
+        estado: EstadoPedido
+    }
+    
+    type PedidoProducto {
+        id: ID
+        cantidad: Int
     }
 
     type Producto { 
@@ -24,6 +31,12 @@
         nombre: String!
         precio: Int!
         stock: Int!
+    }
+
+    enum EstadoPedido { 
+        PENDIENTE
+        COMPLETADO
+        CANCELADO
     }
 
     enum TipoCliente {
@@ -36,15 +49,10 @@
         getClientes(limite: Int, offset: Int): [Cliente]
         getCliente(id: ID) : Cliente
         totalClientes: String
-        obtainProducts(limite: Int, offset: Int) : [Producto]
+        obtainProducts(limite: Int, offset: Int, stock: Boolean) : [Producto]
         getProduct(id: ID) : Producto
         totalProducts: String
 
-    }
-
-    input PedidoInput { 
-        producto: String
-        precio: Int
     }
     
     input EmailInput { 
@@ -69,12 +77,29 @@
         stock: Int!
     }
 
+    input PedidoInput {
+        id: ID
+        pedido: [PedidoProductoInput]
+        total: Int
+        fecha: String
+        cliente: ID
+        estado: EstadoPedido
+    }
+    
+    input PedidoProductoInput {
+        id: ID
+        cantidad: Int
+    }
+
     type Mutation { 
         """ Permite la creacion de nuevos clientes (desscripccion) """
         crearCliente(input: ClienteInput) : Cliente
         actualizarCliente(input: ClienteInput) : Cliente
         eliminarCliente(id: ID!) : String
+        ### seccion de productos
         nuevoProducto(input: ProductoInput) : Producto
         updateProduct(input: ProductoInput) : Producto
         deleteProduct(id: ID!) : String
+        ### seccion de pedidos 
+        nuevoPedido(input: PedidoInput) : Pedido
     }

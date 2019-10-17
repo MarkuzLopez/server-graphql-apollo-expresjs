@@ -1,5 +1,5 @@
 // import mongose from 'mongose';
-import { Clientes, Productos } from './db';
+import { Clientes, Productos, Pedidos } from './db';
 import { rejects } from 'assert';
 
 export const resolvers = { 
@@ -30,7 +30,12 @@ export const resolvers = { 
             })
         },
         // obteniendo los productos
-        obtainProducts: (root, { offset, limite }) => {
+        obtainProducts: (root, { offset, limite, stock }) => {
+            let filtro;
+            // obtiene todos los que sean mayos a cero 
+            if(stock) {
+                filtro = { stock: {$gt : 0} }
+            }
             return new Promise((resolve, object) => {
                 Productos.find({}, (error, productos) => {
                     if (error) rejects(error);
@@ -55,6 +60,7 @@ export const resolvers = { 
                 })
             })
         }
+        // seccion de pedidos 
     },
     Mutation: {
         crearCliente: (root, { input }) => {
@@ -135,5 +141,33 @@ export const resolvers = { 
                 })
             })
         },
+        // sseccion de pedidos 
+        nuevoPedido: (root, {input}) => { 
+            const nuevoPedido =  new Pedidos({ 
+                pedido: input.pedido,
+                total: input.total,
+                fecha: new Date(),
+                cliente: input.cliente,
+                estado: "PENDIENTE"
+            });
+
+            nuevoPedido.id = nuevoPedido._id;
+
+            return new Promise((resolve, object) => {
+                input.pedido.forEach(pedido => {
+                    Productos.updateOne({_id : pedido.id},
+                        { "$inc" : { "stock" : -pedido.cantidad} 
+                    }, function(error) {
+                        if(error) return new Error(error)
+                    })
+                });
+
+                nuevoPedido.save((error) => {
+                    if(error) rejects(error)
+                    else resolve(nuevoPedido)
+                })
+               
+            });
+        }
     }
 }
