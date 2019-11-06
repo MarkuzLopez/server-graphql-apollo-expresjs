@@ -52,6 +52,8 @@
         obtainProducts(limite: Int, offset: Int, stock: Boolean) : [Producto]
         getProduct(id: ID) : Producto
         totalProducts: String
+        #Pedidos
+        obtenerPedidos(cliente: String) : [Pedido]
 
     }
     
@@ -102,4 +104,5 @@
         deleteProduct(id: ID!) : String
         ### seccion de pedidos 
         nuevoPedido(input: PedidoInput) : Pedido
+        actualizarEstado(input: PedidoInput) : String
     }

@@ -59,6 +59,16 @@ export const resolvers = { 
                     else resolve(count)
                 })
             })
+        },
+
+        // obtener Pedidos
+        obtenerPedidos:(root, {cliente}) => {
+            return new Promise((resolve, object) => { 
+                Pedidos.find({cliente: cliente}, (error, pedido) => {
+                    if(error) rejects(error);
+                    else resolve(pedido);
+                })
+            })
         }
         // seccion de pedidos 
     },
@@ -154,20 +164,47 @@ export const resolvers = { 
             nuevoPedido.id = nuevoPedido._id;
 
             return new Promise((resolve, object) => {
-                input.pedido.forEach(pedido => {
-                    Productos.updateOne({_id : pedido.id},
-                        { "$inc" : { "stock" : -pedido.cantidad} 
-                    }, function(error) {
-                        if(error) return new Error(error)
-                    })
-                });
+                // input.pedido.forEach(pedido => {
+                //     Productos.updateOne({_id : pedido.id},
+                //         { "$inc" : { "stock" : -pedido.cantidad} 
+                //     }, function(error) {
+                //         if(error) return new Error(error)
+                //     })
+                // });
 
                 nuevoPedido.save((error) => {
                     if(error) rejects(error)
                     else resolve(nuevoPedido)
                 })
-               
             });
+        },
+        // actualizar estaadode pendiente, completado, cancelado
+        actualizarEstado:(root, {input}) => {
+            return new Promise((resolve, object) => { 
+                // recorrer y ctualizar la cantidad de productos con base al esstado de pedido
+                const { estado } = input;
+
+                let instruccion;
+                if( estado === 'COMPLETADO') {
+                    instruccion = '-';
+                } else if(estado === 'CANCELADO') {
+                    instruccion = '+'
+                }
+
+                // actualiza la caantidad de productos con base al estado del pedido
+                input.pedido.forEach(pedido => {
+                    Productos.updateOne({_id : pedido.id},
+                        { "$inc" : { "stock" : `${instruccion}${pedido.cantidad}`} 
+                    }, function(error) {
+                        if(error) return new Error(error)
+                    })
+                });
+
+                Pedidos.findOneAndUpdate({_id: input.id}, input, {new: true}, (error) => {
+                    if(error) rejects(error);
+                    else resolve('Se actualizo correctamente');
+                })
+            })
         }
     }
 }
