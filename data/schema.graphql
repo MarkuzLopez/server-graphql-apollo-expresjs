@@ -33,6 +33,11 @@
         stock: Int!
     }
 
+    type ClientesTotal { 
+        total: Float
+        cliente: [Cliente]
+    }
+
     enum EstadoPedido { 
         PENDIENTE
         COMPLETADO
@@ -53,7 +58,9 @@
         getProduct(id: ID) : Producto
         totalProducts: String
         #Pedidos
-        obtenerPedidos(cliente: String) : [Pedido]
+        obtenerPedidos(cliente: ID) : [Pedido]
+        #ToClientes
+        topClientes: [ClientesTotal]
 
     }
     
