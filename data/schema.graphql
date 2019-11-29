@@ -38,6 +38,17 @@
         cliente: [Cliente]
     }
 
+    type Token { 
+        token: String!
+    }
+
+    type Usuario { 
+        usuario: String
+        id: ID
+        nombre: String
+        rol: String
+    }
+
     enum EstadoPedido { 
         PENDIENTE
         COMPLETADO
@@ -61,6 +72,8 @@
         obtenerPedidos(cliente: ID) : [Pedido]
         #ToClientes
         topClientes: [ClientesTotal]
+        #ObtenerUsuario
+        obtenerUsuario : Usuario
 
     }
     
@@ -112,4 +125,8 @@
         ### seccion de pedidos 
         nuevoPedido(input: PedidoInput) : Pedido
         actualizarEstado(input: PedidoInput) : String
+        #usuarios 
+        crearUsuario(usuario: String!, nombre: String!, password: String!, rol: String!) : String
+        #aautenticacion de usuarios
+        autenticarUsuario(usuario: String!, password: String) : Token
     }

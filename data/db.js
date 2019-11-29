@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 mongoose.Promise = global.Promise;
 
@@ -40,4 +41,33 @@ const pedidosSchema = new mongoose.Schema({
 
 const Pedidos = mongoose.model('pedidos', pedidosSchema);
 
-export { Clientes, Productos, Pedidos };
+//schema usuarios 
+const usuariosSchema = new mongoose.Schema({
+    usuario: String,
+    nombre: String,
+    password: String,
+    rol: String
+});
+
+/// hashear los password antes de guardaarlos en la baase de daatos 
+usuariosSchema.pre('save', function(next ) { 
+    /// si el password no esta modificado ejecutar la siguiente función.
+    if(!this.isModified('password')) {
+        return next();
+    }
+
+    // entreb mayor sea el numero del genSalt es mayormla seguridad de datoss encriptados
+    bcrypt.genSalt(10, (err, salt) => { 
+        if(err) return next(err);
+
+        bcrypt.hash(this.password, salt, (err, hash ) => { 
+            if(err) return next(err);
+            this.password = hash;
+            next(); 
+        })
+    })
+}) 
+
+const Usuarios = mongoose.model('usuarios', usuariosSchema);
+
+export { Clientes, Productos, Pedidos, Usuarios };

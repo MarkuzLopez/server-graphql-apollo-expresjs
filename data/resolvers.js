@@ -1,6 +1,22 @@
 // import mongose from 'mongose';
-import { Clientes, Productos, Pedidos } from './db';
+import { Clientes, Productos, Pedidos, Usuarios } from './db';
 import { rejects } from 'assert';
+
+/// bcrypt encriptacion 
+import  bcrypt from 'bcrypt';
+
+// Genera token 
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
+
+import jwt from 'jsonwebtoken';
+
+// funcion para crear el token, donde recibira tres parametros
+const crearToken = (usuarioLogin, secreto, expiresIn) => { 
+    const {usuario} =  usuarioLogin;
+
+    return jwt.sign({usuario}, secreto, {expiresIn});
+}
 
 export const resolvers = { 
     Query: {
@@ -104,7 +120,17 @@ export const resolvers = { 
                })
                 
             })
-        } 
+        }, 
+        obtenerUsuario : ( root, args, {usuarioActual}) => { 
+            if(!usuarioActual) {
+                return null;
+            }
+
+            //* Obtener el usuaaario actual del request del JWT verificado
+            const usuario = Usuarios.findOne({usuario: usuarioActual.usuario});
+
+            return usuario;            
+        }
     },
     Mutation: {
         crearCliente: (root, { input }) => {
@@ -239,6 +265,48 @@ export const resolvers = { 
                     else resolve('Se actualizo correctamente');
                 })
             })
+        },
+        
+        crearUsuario: async(root, {usuario, nombre, password, rol }) => { 
+            // el metodo async ayudaa para realizar una consulta de usuarios repetidos
+            ///*  gracias a babel y los estandaares de ecma7 se puede solo declarar solo usuaario
+            ///* en vez de Usuarios.finOne({usuario: usuario})
+            const existeUsuario =  await Usuarios.findOne({usuario})
+
+            if(existeUsuario) { 
+                throw new Error('El usuario ya existe');
+            }
+
+            const nuevoUsuario =  await new Usuarios({ 
+                usuario,
+                nombre,
+                password,
+                rol
+            }).save();
+            console.log(nuevoUsuario);
+
+            return "Usuario Agregado Correctamente";
+        }, 
+
+        autenticarUsuario : async ( root, {usuario, password}) => {
+
+                const nombreUsuario =  await Usuarios.findOne({usuario});
+                
+                /// si el nombre no coincide con la busquedaa de arribaa maandaara el mensaje 
+                if(!nombreUsuario) { 
+                    throw new Error('Usuario no encontrado ');
+                }
+                
+                // al usar el await retornara un true o false dependiendo de la comparación
+                const passwordCorrecto = await bcrypt.compare(password, nombreUsuario.password);
+                
+                if(!passwordCorrecto) { 
+                   throw new  Error('Password Incorrecto');
+                }
+
+                return {
+                    token: crearToken(nombreUsuario, process.env.SECRETO, '1hr')
+                }
         }
     }
 }

@@ -7,34 +7,41 @@ import { typeDefs } from './data/schema'
 // importacion de resolverss
 import { resolvers } from './data/resolvers';
 
-// importacionde graphql
-// import graphqlHTTP from 'express-graphql';
-// import { schema } from './data/schema';
-// import resolvers from './data/resolvers';
+// importaciones  de  jsonweb y genere los tokenss a cada usuario 
+import jwt from 'jsonwebtoken';
+
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env'});
 
 // TODO configuraacion de apollo server 
 const app = express();
-const server = new ApolloServer({typeDefs, resolvers});
+
+// * agregando el token obtenido del servidor que se envia del lado del cliente
+const server = new ApolloServer({
+    typeDefs, 
+    resolvers,
+    context: async ({req}) => { 
+        // obteniendo el token 
+        const token = req.headers['authorization'];
+        // console.log(token);
+        if( token !== "null" || token !== null ){ 
+            try { 
+                // TODO verficar el token del front end (cliente)
+                const usuarioActual = await jwt.verify(token, process.env.SECRETO);
+                // console.log(usuarioActual);
+                // TODO agregamos el usuario actual al request 
+                req.usuarioActual = usuarioActual;
+                //firmammos a caada cliente con el json
+                return { 
+                    usuarioActual
+                }
+            }catch( err) {
+                console.log(err);
+            }
+        }
+    }
+});
 // levantaar ekl sservicio en el navegaador
 server.applyMiddleware({app});
 /// utiilizar el puerto  para el naaavegaador
 app.listen({port: 4000}, () => console.log(`El servidor esta corriendo http://localhost:4000${server.graphqlPath}`));
-
-// // pasar a una constante el resolver  
-// // const root = resolvers;
-// app.get('/', (req, res) =>  { 
-//     res.send('Listo corriendo servidor');
-// });
-// // este apartado funcionaa para reaalizar la graficaa de graphql
-// /// http://localhost:3000/graphql
-// app.use('/graphql', graphqlHTTP({ 
-//     /// el schema que se va utilizar
-//     schema,
-//     /// el ressolver sse paaasaa como rootRessolve de la constante rtesolve 
-//     // rootValue:  root, 
-//     /// utilizar gaarphql
-//     graphiql :  true
-// }))
-// app.listen(3000, () => { 
-//     console.log( 'El servidor esta funcionando');
-// });

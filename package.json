@@ -10,13 +10,17 @@
   "license": "ISC",
   "dependencies": {
     "apollo-server-express": "^2.8.2",
+    "bcrypt": "^3.0.7",
+    "dotenv": "^8.2.0",
     "express-graphql": "^0.9.0",
     "graphql": "^14.4.2",
     "graphql-import": "^0.7.1",
     "graphql-tools": "^4.0.5",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.9",
     "mongose": "0.0.2-security",
     "nodemon": "^1.19.1",
+    "sqlite3": "^4.1.0",
     "xpress": "^2.4.6"
   },
   "devDependencies": {
