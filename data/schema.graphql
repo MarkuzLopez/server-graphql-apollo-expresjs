@@ -62,9 +62,9 @@
     #para realizar comentarios,
     # obtener cliente y clientes  y la paginacion por medio del offset
     type Query {
-        getClientes(limite: Int, offset: Int): [Cliente]
+        getClientes(limite: Int, offset: Int, vendedor : String ): [Cliente]
         getCliente(id: ID) : Cliente
-        totalClientes: String
+        totalClientes(vendedor: String) : String
         obtainProducts(limite: Int, offset: Int, stock: Boolean) : [Producto]
         getProduct(id: ID) : Producto
         totalProducts: String
@@ -90,6 +90,7 @@
         edad: Int!
         tipo: TipoCliente!
         pedidos: [PedidoInput]
+        vendedor: ID
     }
 
     input ProductoInput {
@@ -106,6 +107,7 @@
         fecha: String
         cliente: ID
         estado: EstadoPedido
+        vendedor: ID
     }
     
     input PedidoProductoInput {

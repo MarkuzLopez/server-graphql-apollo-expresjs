@@ -1,7 +1,7 @@
 // import mongose from 'mongose';
 import { Clientes, Productos, Pedidos, Usuarios } from './db';
 import { rejects } from 'assert';
-
+import mongoose from 'mongoose';
 /// bcrypt encriptacion 
 import  bcrypt from 'bcrypt';
 
@@ -11,6 +11,8 @@ dotenv.config({ path: 'variables.env' });
 
 import jwt from 'jsonwebtoken';
 
+// const para el objectId
+const ObjectId = mongoose.Types.ObjectId;
 // funcion para crear el token, donde recibira tres parametros
 const crearToken = (usuarioLogin, secreto, expiresIn) => { 
     const {usuario} =  usuarioLogin;
@@ -20,9 +22,13 @@ const crearToken = (usuarioLogin, secreto, expiresIn) => {
 
 export const resolvers = { 
     Query: {
-        getClientes: (root, { offset, limite }) => {
+        getClientes: (root, { offset, limite, vendedor }) => {
+            let filtro;
+            if(vendedor) {
+                filtro = {vendedor:  new ObjectId(vendedor)}
+            }
             return new Promise((resolve, object) => {
-                Clientes.find({}, (error, clientes) => {
+                Clientes.find({filtro}, (error, clientes) => {
                     if (error) rejects(error)
                     else resolve(clientes)
                 }).limit(limite).skip(offset)
@@ -36,9 +42,13 @@ export const resolvers = { 
                 })
             })
         },
-        totalClientes: (root) => {
+        totalClientes: (root, {vendedor}) => {
             return new Promise((resolve, object) => {
-                Clientes.countDocuments({}, (error, count) => {
+                let filtro;
+                if(vendedor) {
+                    filtro = {vendedor:  new ObjectId(vendedor)}
+                }
+                Clientes.countDocuments(vendedor, (error, count) => {
                     // ssi existe un error maandar el metodo de rechazo y como paraametro el
                     if (error) rejects(error)
                     else resolve(count)
@@ -141,7 +151,8 @@ export const resolvers = { 
                 emails: input.emails,
                 edad: input.edad,
                 tipo: input.tipo,
-                pedidos: input.pedidos
+                pedidos: input.pedidos,
+                vendedor: input.vendedor
             });
 
             // agregar el id 
@@ -218,7 +229,8 @@ export const resolvers = { 
                 total: input.total,
                 fecha: new Date(),
                 cliente: input.cliente,
-                estado: "PENDIENTE"
+                estado: "PENDIENTE",
+                vendedor: input.vendedor
             });
 
             nuevoPedido.id = nuevoPedido._id;
