@@ -9,7 +9,7 @@
   "author": "MarkuzLopez",
   "license": "ISC",
   "dependencies": {
-    "apollo-server-express": "^2.8.2",
+    "apollo-server-express": "^2.14.2",
     "bcrypt": "^3.0.7",
     "dotenv": "^8.2.0",
     "express-graphql": "^0.9.0",
